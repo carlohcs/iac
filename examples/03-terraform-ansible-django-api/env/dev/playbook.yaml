@@ -1,0 +1,60 @@
+- hosts: terraform-ansible
+  tasks:
+    - name: install python3, virtualenv
+      become: yes
+      yum:
+        pkg: 
+          - python3
+          - virtualenv
+        update_cache: yes
+
+    # - name: check if the project it was initialized (example) 
+    #   stat:
+    #     path: /home/ubuntu/tcc/setup/settings.py
+    #   register: projeto
+    # - name: Iniciando o projeto
+    #   shell: '. /home/ubuntu/tcc/venv/bin/activate; django-admin startproject setup /home/ubuntu/tcc/'
+    #   when: not projeto.stat.exists
+
+    - name: remove existing project directory
+      file:
+        path: /home/ec2-user/tcc
+        state: absent
+
+    - name: create project directory
+      file:
+        path: /home/ec2-user/tcc/venv
+        state: directory
+
+    - name: install dependencies with pip (Django and Django Rest)
+      pip:
+        virtualenv: /home/ec2-user/tcc/venv
+        name:
+          - django
+          - djangorestframework
+
+    - name: setup project
+      shell: |
+        . /home/ec2-user/tcc/venv/bin/activate
+        django-admin startproject setup /home/ec2-user/tcc
+
+    - name: update ALLOWED_HOSTS in settings.py
+      lineinfile:
+        path: /home/ec2-user/tcc/setup/settings.py
+        regexp: '^ALLOWED_HOSTS = .*'
+        line: "ALLOWED_HOSTS = ['*']"
+        backrefs: yes
+
+    - name: kill existing Django server
+      shell: pkill -f "python /home/ec2-user/tcc/manage.py runserver 0.0.0.0:8000"
+      ignore_errors: yes
+
+    - name: run server
+      shell: |
+        . /home/ec2-user/tcc/venv/bin/activate
+        sudo kill -9 $(ps aux | grep busybox | grep -v grep | awk '{print $2}')
+        nohup python /home/ec2-user/tcc/manage.py runserver 0.0.0.0:8000 &
+
+
+
+

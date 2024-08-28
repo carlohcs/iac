@@ -1,0 +1,14 @@
+- hosts: terraform-ansible
+  tasks:
+    - name: creates file
+      copy:
+        dest: /home/ec2-user/index.html
+        content: <h1>Hello world! Done with terraform and ansible</h1>
+    - name: install dependencies
+      shell: |
+        wget https://rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/b/busybox-1.36.1-8.fc41.x86_64.rpm
+        sudo yum install -y busybox-1.36.1-8.fc41.x86_64.rpm
+    - name: creates server
+      shell: |
+        sudo kill -9 $(ps aux | grep busybox | grep -v grep | awk '{print $2}')
+        nohup busybox httpd -f -p 8080 &

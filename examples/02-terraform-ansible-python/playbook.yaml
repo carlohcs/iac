@@ -1,0 +1,70 @@
+# After run ansible-playbook blab bla bla bla, connect to the EC2 and run
+# . /home/ec2-user/tcc/venv/bin/activate
+# It should show:
+# (venv) so/path/for/folder
+# And run:
+# pip freeze
+# The output should be:
+# asgiref==3.8.1
+# Django==4.2.15
+# djangorestframework==3.15.2
+# sqlparse==0.5.1
+# typing_extensions==4.12.2
+# After run:
+# django-admin startproject setup .
+# Add ALLOWED_HOSTS = ['*'] inside of settings.py
+# After run:
+# python manage.py runserver 0.0.0.0:8000
+# Access again the page
+- hosts: terraform-ansible
+  tasks:
+    - name: install python3, virtualenv
+      become: yes
+      yum:
+        pkg: 
+          - python3
+          - virtualenv
+        update_cache: yes
+
+    - name: remove existing project directory
+      file:
+        path: /home/ec2-user/tcc
+        state: absent
+
+    - name: create project directory
+      file:
+        path: /home/ec2-user/tcc/venv
+        state: directory
+
+    - name: install dependencies with pip (Django and Django Rest)
+      pip:
+        virtualenv: /home/ec2-user/tcc/venv
+        name:
+          - django
+          - djangorestframework
+
+    - name: setup project
+      shell: |
+        . /home/ec2-user/tcc/venv/bin/activate
+        django-admin startproject setup /home/ec2-user/tcc
+
+    - name: update ALLOWED_HOSTS in settings.py
+      lineinfile:
+        path: /home/ec2-user/tcc/setup/settings.py
+        regexp: '^ALLOWED_HOSTS = .*'
+        line: "ALLOWED_HOSTS = ['*']"
+        backrefs: yes
+
+    - name: kill existing Django server
+      shell: pkill -f "python /home/ec2-user/tcc/manage.py runserver 0.0.0.0:8000"
+      ignore_errors: yes
+
+    - name: run server
+      shell: |
+        . /home/ec2-user/tcc/venv/bin/activate
+        sudo kill -9 $(ps aux | grep busybox | grep -v grep | awk '{print $2}')
+        nohup python /home/ec2-user/tcc/manage.py runserver 0.0.0.0:8000 &
+
+
+
+

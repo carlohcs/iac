@@ -1,0 +1,75 @@
+#!/bin/bash
+cd /home/ec2-user/
+curl --silent --show-error https://bootstrap.pypa.io/get-pip.py | python3
+python3 -m pip install ansible
+
+tee -a playbook.yaml > /dev/null <<EOT
+- hosts: localhost
+  tasks:
+    - name: install python3, virtualenv and git
+      become: yes
+      yum:
+        pkg: 
+          - python3
+          - virtualenv
+          - git
+        update_cache: yes
+
+    # - name: check if the project it was initialized (example) 
+    #   stat:
+    #     path: /home/ubuntu/tcc/setup/settings.py
+    #   register: projeto
+    # - name: Iniciando o projeto
+    #   shell: '. /home/ubuntu/tcc/venv/bin/activate; django-admin startproject setup /home/ubuntu/tcc/'
+    #   when: not projeto.stat.exists
+
+    - name: remove existing project directory
+      file:
+        path: /home/ec2-user/tcc
+        state: absent
+
+    - name: create project directory
+      file:
+        path: /home/ec2-user/tcc/venv
+        state: directory
+
+    - name: git clone
+      ansible.builtin.git:
+        repo: https://github.com/alura-cursos/clientes-leo-api.git
+        dest: /home/ec2-user/tcc/clients
+        version: master # branch
+        force: yes # force get the updated code
+
+    - name: install dependencies with pip (Django and Django Rest)
+      pip:
+        virtualenv: /home/ec2-user/tcc/venv
+        requirements: /home/ec2-user/tcc/clients/requirements.txt
+
+    - name: update ALLOWED_HOSTS in settings.py
+      lineinfile:
+        path: /home/ec2-user/tcc/clients/setup/settings.py
+        regexp: '^ALLOWED_HOSTS = .*'
+        line: "ALLOWED_HOSTS = ['*']"
+        backrefs: yes
+
+    - name: set database
+      shell: | 
+        . /home/ec2-user/tcc/venv/bin/activate
+        python /home/ec2-user/tcc/clients/manage.py migrate
+
+    - name: load database data
+      shell: | 
+        . /home/ec2-user/tcc/venv/bin/activate
+        python /home/ec2-user/tcc/clients/manage.py loaddata clientes.json
+
+    - name: kill existing Django server
+      shell: pkill -f "python /home/ec2-user/tcc/clients/manage.py runserver 0.0.0.0:8000"
+      ignore_errors: yes
+
+    - name: run server
+      shell: |
+        . /home/ec2-user/tcc/venv/bin/activate
+        nohup python /home/ec2-user/tcc/clients/manage.py runserver 0.0.0.0:8000 &
+EOT
+
+ansible-playbook playbook.yaml

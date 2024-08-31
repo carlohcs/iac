@@ -1,0 +1,21 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "application-beanstalk",
+      "image": "520138362070.dkr.ecr.us-east-1.amazonaws.com/ecr-repository-dev:latest",
+      "command": ["npm", "start"],
+      "environment": [],
+      "essential": true,
+      "memory": 256,
+      "links": [],
+      "mountPoints": [],
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 80
+        }
+      ]
+    }
+  ]
+}

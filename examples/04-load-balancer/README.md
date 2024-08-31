@@ -1,4 +1,4 @@
-# Example 03 - Running Python, virtualenv, Django web API and AWS - with everything in place
+# Example 04 - Running Python, virtualenv, Django web API and AWS and Load Balancer and Stress Test
 
 ## Getting Started
 

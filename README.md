@@ -132,3 +132,5 @@ terraform destroy
 - [Example 03 - Running Python, virtualenv, Django web API and AWS - with everything in place](./examples/03-terraform-ansible-django-api/README.md)
 - [# Example 04 - Running Python, virtualenv, Django web API and AWS and Load Balancer and Stress Test](./examples/04-load-balancer/README.md)
 - [# Example 05 - Docker and Elastic Beanstalk at AWS](./examples/05-docker-elastic-beanstalk/README.md)
+- [# Example 06 - VM with Google Cloud](./examples/06-vm-google-cloud-platform/README.md)
+- [# Example 07 - Docker, ECR and ECS](./examples/07-docker-elastic-container-ecs/README.md)

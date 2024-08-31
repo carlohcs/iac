@@ -158,6 +158,33 @@ resource "aws_autoscaling_policy" "autoscaling" {
   count = var.is_prod ? 1 : 0
 }
 
+# Startup and Shutdown of the instances
+resource "aws_autoscaling_schedule" "start_instances" {
+  scheduled_action_name = "start_instances"
+  autoscaling_group_name = aws_autoscaling_group.app_server_asg.name
+  min_size = var.instance_auto_scaling_group_min_size
+  max_size = var.instance_auto_scaling_group_max_size
+  desired_capacity = var.instance_auto_scaling_group_min_size
+  # Cron executes with time + 0, so we need to add 3 hour to the desired time (Brazilian time)
+  recurrence = "0 10 * * MON-FRI" # 7am from Monday to Friday
+
+  # We can define if the resource will be created or not
+  count = var.is_prod ? 1 : 0
+}
+
+resource "aws_autoscaling_schedule" "stop_instances" {
+  scheduled_action_name = "stop_instances"
+  autoscaling_group_name = aws_autoscaling_group.app_server_asg.name
+  min_size = var.instance_auto_scaling_group_min_size
+  max_size = var.instance_auto_scaling_group_max_size
+  desired_capacity = 1
+  # Cron executes with time + 0, so we need to add 3 hour to the desired time (Brazilian time)
+  recurrence = "0 21 * * MON-FRI" # 6pm from Monday to Friday
+
+  # We can define if the resource will be created or not
+  count = var.is_prod ? 1 : 0
+}
+
 # Association from instance to the Target Group
 # resource "aws_lb_target_group_attachment" "load_balancer_attacher" {
 #   target_group_arn = aws_lb_target_group.load_balancer_target.arn

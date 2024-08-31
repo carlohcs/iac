@@ -7,7 +7,7 @@
       "command": ["npm", "start"],
       "environment": [],
       "essential": true,
-      "memory": 256,
+      "memory": 512,
       "links": [],
       "mountPoints": [],
       "portMappings": [

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-basic-app
+  namespace: default  # Avoid errors with ansible
+  labels:
+    name: pod-basic-app
+spec:
+  containers:
+  - name: pod-basic-app
+    image: carlohcs/basic-app
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 3000
+        hostPort: 3000

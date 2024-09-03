@@ -1,0 +1,42 @@
+# https://stackoverflow.com/a/70613765
+# https://github.com/ansible-collections/kubernetes.core
+# ansible-galaxy collection install kubernetes.core
+# gcloud container clusters get-credentials thermal-micron-427901-e1-gke --region us-central1 --project thermal-micron-427901-e1
+# Error:
+# CRITICAL: ACTION REQUIRED: gke-gcloud-auth-plugin, which is needed for continued use of kubectl, was not found or is not executable. Install gke-gcloud-auth-plugin for use with kubectl by following https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#install_plugin
+# gcloud components install gke-gcloud-auth-plugin --quiet
+# /Users/carlohcs/.pyenv/versions/3.9.1/bin/python -m pip install kubernetes
+# ansible playbook.yaml
+- name: install_kubernetes_files
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    namespace: default  # Avoid errors with ansible
+    obj_def_path: ../k8s
+    obj_def_list:
+      - pod-app.yaml
+      - deployment-app.yaml
+      - svc-app.yaml
+      - ingress-app.yaml
+
+  tasks:
+    - name: install_kubernetes_files_from_def_files
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        src: "{{ obj_def_path }}/{{ item }}"
+        state: present
+        apply: true
+      loop: "{{ obj_def_list }}"
+
+    - name: Get Ingress details
+      kubernetes.core.k8s_info:
+        api_version: networking.k8s.io/v1
+        kind: Ingress
+        namespace: default
+        name: ingress-basic-app
+      register: ingress_info
+
+    - name: Print Ingress IP
+      debug:
+        msg: "{{ ingress_info.resources[0].status.loadBalancer.ingress[0].ip }}"

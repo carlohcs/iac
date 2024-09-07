@@ -1,4 +1,4 @@
-# Example 08 - Terraform e Kubernetes
+# Example 08 - Terraform and Kubernetes
 
 ## Why this approach?
 

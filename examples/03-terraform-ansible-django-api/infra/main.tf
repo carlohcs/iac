@@ -33,3 +33,11 @@ resource "aws_key_pair" "ssh-key" {
 output "infra_public_ip" {
   value = aws_instance.app_server.public_ip
 }
+
+output "cluster_endpoint" {
+  value = aws_eks_cluster.basic_app_cluster.endpoint
+}
+
+output "cluster_security_group_id" {
+  value = aws_eks_cluster.basic_app_cluster.vpc_config[0].cluster_security_group_id
+}

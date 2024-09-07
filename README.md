@@ -134,3 +134,4 @@ terraform destroy
 - [# Example 05 - Docker and Elastic Beanstalk at AWS](./examples/05-docker-elastic-beanstalk/README.md)
 - [# Example 06 - VM with Google Cloud](./examples/06-vm-google-cloud-platform/README.md)
 - [# Example 07 - Docker, ECR and ECS](./examples/07-docker-elastic-container-ecs/README.md)
+- [# Example 08 - Terraform and Kubernetes](./examples/08-terraform-kubernetes/README.md)
